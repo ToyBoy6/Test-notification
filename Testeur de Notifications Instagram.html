@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Notification Tester</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        igPink: '#E1306C',
+                        igPurple: '#833AB4',
+                        igOrange: '#F56040',
+                        igYellow: '#FCAF45',
+                        igDarkBg: '#121212',
+                        igDarkCard: '#1E1E1E',
+                        igDarkBorder: '#262626'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom Instagram gradient border */
+        .ig-gradient-bg {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        .ig-gradient-text {
+            background: -webkit-linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Lock screen simulation styling */
+        .phone-frame {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border: 10px solid #2d2d2d;
+            border-radius: 40px;
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-100 min-h-screen pb-12">
+
+    <!-- Navbar Header -->
+    <header class="border-b border-igDarkBorder bg-black/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl ig-gradient-bg flex items-center justify-center text-white shadow-lg">
+                    <i data-lucide="instagram" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide">InstaNotify Simulator</h1>
+                    <p class="text-xs text-gray-400">Testeur de Notifications Web & Push Native</p>
+                </div>
+            </div>
+
+            <!-- Permission Badge -->
+            <div id="permissionContainer" class="flex items-center gap-2">
+                <span id="permissionBadge" class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                    Permission: Non demandée
+                </span>
+                <button id="btnRequestPermission" onclick="requestNotificationPermission()" class="text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1.5 shadow-md">
+                    <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+                    Activer
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Left Column: Scheduler & Presets (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- Information Banner -->
+            <div class="bg-igDarkCard border border-igDarkBorder rounded-2xl p-4 flex gap-3 items-start shadow-sm">
+                <i data-lucide="info" class="w-5 h-5 text-igPink shrink-0 mt-0.5"></i>
+                <div class="text-xs text-gray-300 leading-relaxed">
+                    <p class="font-semibold text-white mb-1">Comment fonctionnent les notifications réelles ?</p>
+                    <p>En cliquant sur <strong>"Activer"</strong>, votre navigateur vous demandera la permission d'afficher des notifications système. Une fois programmée, même si vous réduisez la fenêtre, une vraie notification apparaîtra sur votre bureau ou mobile !</p>
+                </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="bg-igDarkCard border border-igDarkBorder rounded-2xl p-5 shadow-lg">
+                <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4 text-yellow-400"></i>
+                    Préréglages Rapides
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <button onclick="applyPreset('like')" class="p-2.5 bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700/60 rounded-xl text-left transition-all group">
+                        <div class="text-igPink mb-1 group-hover:scale-110 transition-transform"><i data-lucide="heart" class="w-4 h-4"></i></div>
+                        <div class="text-xs font-semibold text-white">Nouveau J'aime</div>
+                        <div class="text-[10px] text-gray-400 truncate">@alex_dev a aimé</div>
+                    </button>
+                    <button onclick="applyPreset('comment')" class="p-2.5 bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700/60 rounded-xl text-left transition-all group">
+                        <div class="text-blue-400 mb-1 group-hover:scale-110 transition-transform"><i data-lucide="message-circle" class="w-4 h-4"></i></div>
+                        <div class="text-xs font-semibold text-white">Commentaire</div>
+                        <div class="text-[10px] text-gray-400 truncate">Trois émojis 🔥🔥🔥</div>
+                    </button>
+                    <button onclick="applyPreset('follow')" class="p-2.5 bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700/60 rounded-xl text-left transition-all group">
+                        <div class="text-purple-400 mb-1 group-hover:scale-110 transition-transform"><i data-lucide="user-plus" class="w-4 h-4"></i></div>
+                        <div class="text-xs font-semibold text-white">Abonnement</div>
+                        <div class="text-[10px] text-gray-400 truncate">S'est abonné(e)</div>
+                    </button>
+                    <button onclick="applyPreset('dm')" class="p-2.5 bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700/60 rounded-xl text-left transition-all group">
+                        <div class="text-green-400 mb-1 group-hover:scale-110 transition-transform"><i data-lucide="send" class="w-4 h-4"></i></div>
+                        <div class="text-xs font-semibold text-white">Message Direct</div>
+                        <div class="text-[10px] text-gray-400 truncate">On se voit ce soir ?</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form: Schedule Notification -->
+            <div class="bg-igDarkCard border border-igDarkBorder rounded-2xl p-6 shadow-xl">
+                <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2 border-b border-igDarkBorder pb-3">
+                    <i data-lucide="clock" class="w-5 h-5 text-igPink"></i>
+                    Programmer une Notification
+                </h2>
+
+                <form id="notifyForm" onsubmit="scheduleNotification(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Type -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Type d'interaction</label>
+                            <select id="notifType" onchange="updatePreviewFromForm()" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-igPink">
+                                <option value="like">❤️ J'aime sur une photo</option>
+                                <option value="comment">💬 Commentaire</option>
+                                <option value="follow">👤 Nouvel abonné</option>
+                                <option value="dm">✉️ Message Direct (DM)</option>
+                                <option value="mention">🏷️ Mention dans une story</option>
+                            </select>
+                        </div>
+
+                        <!-- Username -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Nom d'utilisateur</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-gray-500 text-sm">@</span>
+                                <input type="text" id="username" value="sophie_art" oninput="updatePreviewFromForm()" required class="w-full bg-neutral-900 border border-neutral-700 rounded-xl pl-7 pr-3 py-2 text-sm text-white focus:outline-none focus:border-igPink" placeholder="nom_utilisateur">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Body -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Contenu / Message</label>
+                        <input type="text" id="messageText" value="a aimé votre publication." oninput="updatePreviewFromForm()" required class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-igPink" placeholder="Texte de la notification">
+                    </div>
+
+                    <!-- Delay timer -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Délai avant déclenchement</label>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="setTimerSec(3)" class="px-3 py-1.5 bg-neutral-800 border border-neutral-700 hover:border-igPink rounded-lg text-xs font-medium">3s</button>
+                                <button type="button" onclick="setTimerSec(5)" class="px-3 py-1.5 bg-neutral-800 border border-neutral-700 hover:border-igPink rounded-lg text-xs font-medium">5s</button>
+                                <button type="button" onclick="setTimerSec(10)" class="px-3 py-1.5 bg-neutral-800 border border-neutral-700 hover:border-igPink rounded-lg text-xs font-medium">10s</button>
+                                <button type="button" onclick="setTimerSec(30)" class="px-3 py-1.5 bg-neutral-800 border border-neutral-700 hover:border-igPink rounded-lg text-xs font-medium">30s</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Secondes exactes</label>
+                            <input type="number" id="delaySeconds" min="1" max="300" value="5" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-igPink">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-3 pt-4">
+                        <button type="submit" class="flex-1 ig-gradient-bg text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="timer" class="w-4 h-4"></i>
+                            Programmer la notification
+                        </button>
+                        <button type="button" onclick="triggerImmediate()" class="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white font-medium py-2.5 px-4 rounded-xl transition-all flex items-center gap-1.5 text-xs">
+                            <i data-lucide="play" class="w-3.5 h-3.5 text-green-400"></i>
+                            Tester de suite
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Active Timers / Queue -->
+            <div class="bg-igDarkCard border border-igDarkBorder rounded-2xl p-5 shadow-lg">
+                <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="hourglass" class="w-4 h-4 text-igOrange"></i>
+                        File d'attente des programmes
+                    </span>
+                    <span id="pendingCount" class="text-xs bg-neutral-800 px-2 py-0.5 rounded-full text-gray-400">0 en attente</span>
+                </h3>
+
+                <div id="pendingList" class="space-y-2">
+                    <p id="emptyQueueText" class="text-xs text-gray-500 italic py-3 text-center">Aucune notification programmée en ce moment.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Visual Preview & History (5 cols) -->
+        <div class="lg:col-span-5 space-y-6">
+
+            <!-- Mobile Screen Preview Simulator -->
+            <div class="bg-igDarkCard border border-igDarkBorder rounded-2xl p-5 shadow-xl">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center justify-between">
+                    <span>Aperçu Écran / Push In-App</span>
+                    <span class="text-[10px] bg-neutral-800 text-gray-400 px-2 py-0.5 rounded">Simulateur</span>
+                </h2>
+
+                <div class="phone-frame bg-gradient-to-b from-neutral-900 to-black p-4 relative min-h-[220px] flex flex-col justify-start overflow-hidden">
+                    <!-- Status bar mock -->
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 mb-4 px-1">
+                        <span>09:41</span>
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="wifi" class="w-3 h-3"></i>
+                            <i data-lucide="battery" class="w-3.5 h-3.5"></i>
+                        </div>
+                    </div>
+
+                    <!-- In-App Banner Toast Mock -->
+                    <div id="previewBanner" class="bg-neutral-800/95 backdrop-blur-md border border-neutral-700/80 rounded-2xl p-3 shadow-2xl transition-all transform hover:scale-102">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <img id="prevAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover border border-neutral-600" alt="Avatar">
+                                <div id="prevBadgeIcon" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-igPink flex items-center justify-center text-white text-[10px] border border-black">
+                                    <i data-lucide="heart" class="w-3 h-3"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-white truncate flex items-center gap-1">
+                                        Instagram
+                                        <span class="w-1.5 h-1.5 rounded-full bg-igPink inline-block"></span>
+                                    </span>
+                                    <span class="text-[10px] text-gray-400">à l'instant</span>
+                                </div>
+                                <p class="text-xs text-gray-200 mt-0.5 leading-snug">
+                                    <strong id="prevUsername" class="font-semibold">@sophie_art</strong> 
+                                    <span id="prevText">a aimé votre publication.</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-auto pt-6">
+                        <p class="text-[10px] text-gray-500">Ceci est une illustration visuelle du rendu de la notification.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification History / Activity Log -->
+            <div class="bg-igDarkCard border border-igDarkBorder rounded-2xl p-5 shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-gray-400"></i>
+                        Historique des envois
+                    </h3>
+                    <button onclick="clearHistory()" class="text-[11px] text-gray-500 hover:text-gray-300">Effacer</button>
+                </div>
+
+                <div id="historyList" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                    <p id="emptyHistoryText" class="text-xs text-gray-500 italic py-3 text-center">Aucune notification envoyée pour le moment.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Custom Notification In-App Overlay Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4"></div>
+
+    <script>
+        // Store scheduled timers & history
+        let pendingTimers = [];
+        let historyLogs = [];
+
+        // Predefined avatar collection for simulation
+        const sampleAvatars = [
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80'
+        ];
+
+        // Initialize icons and check permission on load
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            checkNotificationPermissionStatus();
+            updatePreviewFromForm();
+        });
+
+        // Check current notification permission state
+        function checkNotificationPermissionStatus() {
+            const badge = document.getElementById('permissionBadge');
+            const btn = document.getElementById('btnRequestPermission');
+
+            if (!('Notification' in window)) {
+                badge.className = "px-3 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30";
+                badge.innerHTML = `<i data-lucide="x-circle" class="w-3 h-3 inline mr-1"></i> Non supporté`;
+                btn.style.display = 'none';
+                lucide.createIcons();
+                return;
+            }
+
+            const perm = Notification.permission;
+            if (perm === 'granted') {
+                badge.className = "px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5";
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Notifications Autorisées`;
+                btn.style.display = 'none';
+            } else if (perm === 'denied') {
+                badge.className = "px-3 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1.5";
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span> Bloquées par le navigateur`;
+                btn.textContent = 'Débloquer';
+            } else {
+                badge.className = "px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1.5";
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Permission non accordée`;
+                btn.style.display = 'inline-flex';
+            }
+            lucide.createIcons();
+        }
+
+        // Request Browser Notification Permission
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                alert("Votre navigateur ne prend pas en charge les notifications Web.");
+                return;
+            }
+
+            try {
+                const permission = await Notification.requestPermission();
+                checkNotificationPermissionStatus();
+
+                if (permission === 'granted') {
+                    // Send a welcoming test notification
+                    sendNativeNotification("Instagram Test", {
+                        body: "Les notifications réelles sont désormais activées !",
+                        icon: sampleAvatars[0]
+                    });
+                }
+            } catch (err) {
+                console.error("Erreur lors de la demande de permission:", err);
+            }
+        }
+
+        // Set timer value helper button
+        function setTimerSec(sec) {
+            document.getElementById('delaySeconds').value = sec;
+        }
+
+        // Apply pre-configured notification presets
+        function applyPreset(type) {
+            const usernameInput = document.getElementById('username');
+            const typeSelect = document.getElementById('notifType');
+            const messageInput = document.getElementById('messageText');
+
+            switch (type) {
+                case 'like':
+                    typeSelect.value = 'like';
+                    usernameInput.value = 'alex_dev';
+                    messageInput.value = 'a aimé votre photo.';
+                    break;
+                case 'comment':
+                    typeSelect.value = 'comment';
+                    usernameInput.value = 'clara_design';
+                    messageInput.value = 'a commenté : 🔥🔥🔥 Incroyable rendu !';
+                    break;
+                case 'follow':
+                    typeSelect.value = 'follow';
+                    usernameInput.value = 'marco_travel';
+                    messageInput.value = 'a commencé à vous suivre.';
+                    break;
+                case 'dm':
+                    typeSelect.value = 'dm';
+                    usernameInput.value = 'julie_fit';
+                    messageInput.value = 'vous a envoyé un message : On se voit à quelle heure ?';
+                    break;
+            }
+            updatePreviewFromForm();
+        }
+
+        // Dynamic update of preview UI card
+        function updatePreviewFromForm() {
+            const username = document.getElementById('username').value || 'utilisateur';
+            const message = document.getElementById('messageText').value || '';
+            const type = document.getElementById('notifType').value;
+
+            document.getElementById('prevUsername').textContent = '@' + username;
+            document.getElementById('prevText').textContent = ' ' + message;
+
+            const badgeIcon = document.getElementById('prevBadgeIcon');
+            let iconName = 'heart';
+            let bgClass = 'bg-igPink';
+
+            if (type === 'comment') {
+                iconName = 'message-circle';
+                bgClass = 'bg-blue-500';
+            } else if (type === 'follow') {
+                iconName = 'user-plus';
+                bgClass = 'bg-purple-600';
+            } else if (type === 'dm') {
+                iconName = 'send';
+                bgClass = 'bg-emerald-500';
+            } else if (type === 'mention') {
+                iconName = 'at-sign';
+                bgClass = 'bg-amber-500';
+            }
+
+            badgeIcon.className = `absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${bgClass} flex items-center justify-center text-white text-[10px] border border-black`;
+            badgeIcon.innerHTML = `<i data-lucide="${iconName}" class="w-3 h-3"></i>`;
+
+            // Randomize avatar based on length of username for variety
+            const avatarIdx = username.length % sampleAvatars.length;
+            document.getElementById('prevAvatar').src = sampleAvatars[avatarIdx];
+
+            lucide.createIcons();
+        }
+
+        // Schedule notification handler
+        function scheduleNotification(event) {
+            event.preventDefault();
+
+            const type = document.getElementById('notifType').value;
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('messageText').value;
+            const delaySec = parseInt(document.getElementById('delaySeconds').value, 10) || 5;
+
+            const timerId = Date.now();
+            const avatar = sampleAvatars[username.length % sampleAvatars.length];
+
+            const item = {
+                id: timerId,
+                type,
+                username,
+                message,
+                delaySec,
+                remainingSec: delaySec,
+                avatar,
+                interval: null
+            };
+
+            // Start countdown interval
+            item.interval = setInterval(() => {
+                item.remainingSec--;
+                updateQueueUI();
+
+                if (item.remainingSec <= 0) {
+                    clearInterval(item.interval);
+                    triggerNotification(item);
+                    removePendingTimer(item.id);
+                }
+            }, 1000);
+
+            pendingTimers.push(item);
+            updateQueueUI();
+        }
+
+        // Immediate trigger button handler
+        function triggerImmediate() {
+            const type = document.getElementById('notifType').value;
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('messageText').value;
+            const avatar = sampleAvatars[username.length % sampleAvatars.length];
+
+            triggerNotification({
+                type,
+                username,
+                message,
+                avatar
+            });
+        }
+
+        // Execute notification delivery (Native + In-App Toast)
+        function triggerNotification(data) {
+            const title = `Instagram • @${data.username}`;
+            const body = data.message;
+
+            // 1. Send Browser Native Web Notification
+            if (Notification.permission === 'granted') {
+                sendNativeNotification(title, {
+                    body: body,
+                    icon: data.avatar,
+                    badge: data.avatar,
+                    vibrate: [200, 100, 200],
+                    tag: 'instagram-notification-' + Date.now()
+                });
+            }
+
+            // 2. Play Audio Sound Effect (Synthesized Bleep)
+            playNotificationSound();
+
+            // 3. Render In-App Floating Toast
+            renderInAppToast(data.username, data.message, data.avatar, data.type);
+
+            // 4. Record to Log History
+            addHistoryLog(data);
+        }
+
+        // Native Notification Call
+        function sendNativeNotification(title, options) {
+            try {
+                const notif = new Notification(title, options);
+                notif.onclick = function() {
+                    window.focus();
+                    this.close();
+                };
+            } catch (e) {
+                console.error("Erreur d'envoi de la notification native:", e);
+            }
+        }
+
+        // Synthesize a subtle notification sound using Web Audio API
+        function playNotificationSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch (e) {
+                // Audio Context might be restricted before user interaction
+            }
+        }
+
+        // Render In-app Toast Banner
+        function renderInAppToast(username, message, avatar, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            toast.className = "pointer-events-auto bg-neutral-900/95 text-white border border-neutral-700/80 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-y-4 opacity-0";
+            
+            toast.innerHTML = `
+                <img src="${avatar}" class="w-10 h-10 rounded-full object-cover border border-neutral-600" alt="Avatar">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-white flex items-center gap-1">Instagram</span>
+                        <span class="text-[10px] text-gray-400">maintenant</span>
+                    </div>
+                    <p class="text-xs text-gray-200 mt-0.5 truncate">
+                        <strong class="font-semibold">@${username}</strong> ${message}
+                    </p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 50);
+
+            // Auto dismiss after 4s
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Update Queue UI list
+        function updateQueueUI() {
+            const queueContainer = document.getElementById('pendingList');
+            const countBadge = document.getElementById('pendingCount');
+
+            countBadge.textContent = `${pendingTimers.length} en attente`;
+
+            if (pendingTimers.length === 0) {
+                queueContainer.innerHTML = `<p id="emptyQueueText" class="text-xs text-gray-500 italic py-3 text-center">Aucune notification programmée en ce moment.</p>`;
+                return;
+            }
+
+            queueContainer.innerHTML = pendingTimers.map(item => `
+                <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <img src="${item.avatar}" class="w-7 h-7 rounded-full object-cover">
+                        <div class="truncate">
+                            <p class="text-xs font-semibold text-white truncate">@${item.username}</p>
+                            <p class="text-[11px] text-gray-400 truncate">${item.message}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="text-xs font-mono font-bold text-igOrange bg-orange-500/10 px-2 py-1 rounded-md border border-orange-500/20">
+                            ${item.remainingSec}s
+                        </span>
+                        <button onclick="cancelTimer(${item.id})" class="text-gray-500 hover:text-red-400 text-xs">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // Remove from queue
+        function removePendingTimer(id) {
+            pendingTimers = pendingTimers.filter(t => t.id !== id);
+            updateQueueUI();
+        }
+
+        // Cancel specific timer
+        function cancelTimer(id) {
+            const item = pendingTimers.find(t => t.id === id);
+            if (item && item.interval) {
+                clearInterval(item.interval);
+            }
+            removePendingTimer(id);
+        }
+
+        // Add item to history log
+        function addHistoryLog(data) {
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            historyLogs.unshift({ ...data, timeStr });
+
+            const historyContainer = document.getElementById('historyList');
+
+            historyContainer.innerHTML = historyLogs.map(log => `
+                <div class="bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <img src="${log.avatar}" class="w-6 h-6 rounded-full object-cover">
+                        <span class="text-gray-200 truncate"><strong>@${log.username}</strong> ${log.message}</span>
+                    </div>
+                    <span class="text-[10px] text-gray-500 font-mono shrink-0 ml-2">${log.timeStr}</span>
+                </div>
+            `).join('');
+        }
+
+        // Clear history log
+        function clearHistory() {
+            historyLogs = [];
+            document.getElementById('historyList').innerHTML = `<p id="emptyHistoryText" class="text-xs text-gray-500 italic py-3 text-center">Aucune notification envoyée pour le moment.</p>`;
+        }
+    </script>
+</body>
+</html>
