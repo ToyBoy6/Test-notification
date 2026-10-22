@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram</title>
+  <title>Instagram - Vérification IA</title>
+  <!-- Importation du SDK Google Gen AI -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.run/@google/genai"
+      }
+    }
+  </script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -21,87 +29,166 @@
     .card {
       background: #121212;
       border: 1px solid #262626;
-      padding: 30px;
+      padding: 25px;
       border-radius: 12px;
-      max-width: 350px;
+      max-width: 380px;
       width: 100%;
       text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
     }
-    h2 { font-size: 1.8rem; margin-bottom: 20px; color: #fff; }
-    button {
+    h2 { font-size: 1.6rem; margin-bottom: 5px; color: #fff; }
+    .subtitle { font-size: 12px; color: #a8a8a8; margin-bottom: 20px; }
+    input, button {
       width: 100%;
-      padding: 14px;
-      margin-top: 12px;
+      padding: 12px;
+      margin-top: 10px;
       border: none;
       border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 15px;
+      font-weight: 600;
+      font-size: 14px;
+      box-sizing: border-box;
     }
-    .btn-perm { background-color: #262626; color: white; border: 1px solid #363636; }
-    .btn-show { background-color: #0095f6; color: white; }
-    .status { font-size: 13px; color: #a8a8a8; margin-top: 15px; }
+    input[type="password"] {
+      background: #262626;
+      color: white;
+      border: 1px solid #363636;
+      margin-bottom: 10px;
+    }
+    .btn-perm { background-color: #262626; color: white; border: 1px solid #363636; cursor: pointer; }
+    .btn-ai { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; cursor: pointer; }
+    .btn-show { background-color: #0095f6; color: white; cursor: pointer; }
+    
+    #file-input { display: none; }
+    .upload-label {
+      display: block;
+      background-color: #262626;
+      color: #0095f6;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+      border: 1px dashed #0095f6;
+      font-size: 14px;
+    }
+    .status { font-size: 13px; color: #a8a8a8; margin-top: 15px; line-height: 1.4; }
+    #preview { max-width: 100%; border-radius: 8px; margin-top: 10px; display: none; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>Instagram</h2>
+    <h2>Instagram IA</h2>
+    <div class="subtitle">Vérification de tâches par l'IA</div>
+
+    <!-- Clé API Gemini -->
+    <input type="password" id="api-key" placeholder="Entrez votre clé API Gemini">
+
     <button id="btn-perm" class="btn-perm">1. Activer les notifications</button>
-    <button id="btn-show" class="btn-show">2. Envoyer la notification</button>
-    <div id="status" class="status">Initialisation...</div>
+    
+    <!-- Bouton pour prendre/choisir une photo -->
+    <label for="file-input" class="upload-label">📸 Prendre en photo la tâche</label>
+    <input type="file" id="file-input" accept="image/*" capture="environment">
+
+    <img id="preview" alt="Aperçu">
+    <div id="status" class="status">En attente d'une photo...</div>
   </div>
 
-  <script>
-    const statusDiv = document.getElementById('status');
+  <script type="module">
+    import { GoogleGenAI } from "@google/genai";
 
-    // Enregistrement du vrai fichier sw.js
+    const statusDiv = document.getElementById('status');
+    const fileInput = document.getElementById('file-input');
+    const previewImg = document.getElementById('preview');
+    const apiKeyInput = document.getElementById('api-key');
+
+    // Enregistrement du Service Worker
     async function initSW() {
       if ('serviceWorker' in navigator) {
         try {
           await navigator.serviceWorker.register('./sw.js');
-          statusDiv.innerText = "Prêt (Service Worker chargé)";
         } catch (err) {
-          statusDiv.innerText = "Erreur SW : " + err.message;
+          console.error("Erreur SW", err);
         }
-      } else {
-        statusDiv.innerText = "Service Worker non supporté";
       }
     }
+    initSW();
 
-    // Demande de permission
+    // Gestion des permissions de notification
     document.getElementById('btn-perm').addEventListener('click', async () => {
-      if (!('Notification' in window)) {
-        statusDiv.innerText = "Notifications non supportées";
-        return;
-      }
       const perm = await Notification.requestPermission();
-      statusDiv.innerText = "Permission : " + perm;
+      statusDiv.innerText = perm === 'granted' ? "Notifications autorisées !" : "Permission refusée.";
     });
 
-    // Envoi conforme aux règles Android
-    document.getElementById('btn-show').addEventListener('click', async () => {
-      if (Notification.permission !== 'granted') {
-        alert("Veuillez d'abord autoriser les notifications !");
+    // Conversion d'une image en format acceptable par l'API Gemini
+    function fileToGenerativePart(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve({
+            inlineData: {
+              data: reader.result.split(',')[1],
+              mimeType: file.type
+            },
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Lorsque l'utilisateur sélectionne/prend une photo
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) {
+        alert("Veuillez d'abord entrer votre clé API Gemini !");
+        fileInput.value = "";
         return;
       }
+
+      // Afficher l'aperçu de l'image
+      previewImg.src = URL.createObjectURL(file);
+      previewImg.style.display = 'block';
+      statusDiv.innerText = "Analyse de la photo par l'IA en cours...";
 
       try {
-        const reg = await navigator.serviceWorker.ready;
-        await reg.showNotification("Instagram", {
-          body: "charlotte_g33k a aimé votre photo.",
-          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-          badge: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-          vibrate: [200, 100, 200],
-          tag: "insta-test"
+        // Initialisation de Google Gen AI SDK
+        const ai = new GoogleGenAI({ apiKey: apiKey });
+        const imagePart = await fileToGenerativePart(file);
+
+        // Appel du modèle multimodal Gemini 2.5 Flash
+        const response =.ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            imagePart,
+            "Analyse cette image. Réponds STRICTEMENT par 'OUI' si la tâche semble accomplie/correcte, ou par 'NON' suivie d'une courte explication si ce n'est pas le cas."
+          ],
         });
-        statusDiv.innerText = "Notification envoyée !";
+
+        const resultText = (await response).text.trim();
+        
+        if (resultText.toUpperCase().startsWith('OUI')) {
+          statusDiv.innerText = "Succès ! Tâche validée par l'IA 🎉";
+          
+          // Déclencher la notification de validation style Instagram
+          const reg = await navigator.serviceWorker.ready;
+          if (reg) {
+            reg.showNotification("Instagram", {
+              body: "L'IA a validé votre tâche avec succès !",
+              icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+              tag: "ai-success"
+            });
+          }
+        } else {
+          statusDiv.innerText = "Refusé par l'IA : " + resultText;
+        }
+
       } catch (err) {
-        statusDiv.innerText = "Erreur d'envoi : " + err.message;
+        statusDiv.innerText = "Erreur de l'IA : " + err.message;
       }
     });
-
-    initSW();
   </script>
 </body>
 </html>
