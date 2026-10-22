@@ -16,6 +16,7 @@
       min-height: 100vh;
       margin: 0;
       padding: 20px;
+      box-sizing: border-box;
     }
     .card {
       background: #121212;
@@ -26,7 +27,7 @@
       width: 100%;
       text-align: center;
     }
-    h2 { font-size: 1.8rem; margin-bottom: 20px; }
+    h2 { font-size: 1.8rem; margin-bottom: 20px; color: #fff; }
     button {
       width: 100%;
       padding: 14px;
@@ -48,45 +49,59 @@
     <h2>Instagram</h2>
     <button id="btn-perm" class="btn-perm">1. Activer les notifications</button>
     <button id="btn-show" class="btn-show">2. Envoyer la notification</button>
-    <div id="status" class="status">En attente...</div>
+    <div id="status" class="status">Initialisation...</div>
   </div>
 
   <script>
     const statusDiv = document.getElementById('status');
 
+    // Enregistrement du vrai fichier sw.js
+    async function initSW() {
+      if ('serviceWorker' in navigator) {
+        try {
+          await navigator.serviceWorker.register('./sw.js');
+          statusDiv.innerText = "Prêt (Service Worker chargé)";
+        } catch (err) {
+          statusDiv.innerText = "Erreur SW : " + err.message;
+        }
+      } else {
+        statusDiv.innerText = "Service Worker non supporté";
+      }
+    }
+
+    // Demande de permission
     document.getElementById('btn-perm').addEventListener('click', async () => {
       if (!('Notification' in window)) {
-        statusDiv.innerText = "Non supporté";
+        statusDiv.innerText = "Notifications non supportées";
         return;
       }
       const perm = await Notification.requestPermission();
       statusDiv.innerText = "Permission : " + perm;
     });
 
-    document.getElementById('btn-show').addEventListener('click', () => {
+    // Envoi conforme aux règles Android
+    document.getElementById('btn-show').addEventListener('click', async () => {
       if (Notification.permission !== 'granted') {
         alert("Veuillez d'abord autoriser les notifications !");
         return;
       }
 
-      // Déclenchement direct via l'API standard
       try {
-        const notif = new Notification("Instagram", {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification("Instagram", {
           body: "charlotte_g33k a aimé votre photo.",
           icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-          tag: "insta-direct"
+          badge: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+          vibrate: [200, 100, 200],
+          tag: "insta-test"
         });
-        
-        notif.onclick = function() {
-          window.focus();
-          notif.close();
-        };
-
-        statusDiv.innerText = "Notification déclenchée !";
+        statusDiv.innerText = "Notification envoyée !";
       } catch (err) {
-        statusDiv.innerText = "Erreur : " + err.message;
+        statusDiv.innerText = "Erreur d'envoi : " + err.message;
       }
     });
+
+    initSW();
   </script>
 </body>
 </html>
