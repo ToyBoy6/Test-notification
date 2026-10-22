@@ -1,365 +1,245 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>InstaTask & Notifications</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tailwind Custom Config -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        igBg: '#000000',
-                        igCard: '#121212',
-                        igBorder: '#262626',
-                        igBlue: '#0095f6',
-                        igBlueHover: '#1877f2',
-                        igGrayText: '#a8a8a8',
-                    },
-                    backgroundImage: {
-                        'ig-gradient': 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #000000;
-            color: #f5f5f5;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #000;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #262626;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram - Task Manager & IA</title>
+  <!-- Importation du SDK Google Gen AI -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.run/@google/genai"
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #000000;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #121212;
+      border: 1px solid #262626;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+    h2 { font-size: 1.6rem; margin-bottom: 5px; color: #fff; }
+    .subtitle { font-size: 12px; color: #a8a8a8; margin-bottom: 20px; }
+    
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #262626;
+      color: white;
+      border: 1px solid #363636;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .btn-notif { background-color: #262626; color: white; border: 1px solid #363636; }
+    .btn-todo { background-color: #0095f6; color: white; }
+    .btn-back { background-color: #363636; color: white; margin-top: 20px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    #file-input { display: none; }
+    .upload-label {
+      display: block;
+      background-color: #262626;
+      color: #0095f6;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      cursor: pointer;
+      border: 1px dashed #0095f6;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status { font-size: 13px; color: #a8a8a8; margin-top: 15px; line-height: 1.4; }
+    #preview { max-width: 100%; border-radius: 8px; margin-top: 10px; display: none; }
+    
+    ul { list-style: none; padding: 0; margin: 15px 0; text-align: left; }
+    li { background: #1a1a1a; padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #262626; }
+  </style>
 </head>
-<body class="bg-igBg text-white flex flex-col min-h-screen max-w-md mx-auto relative border-x border-igBorder shadow-2xl">
+<body>
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 bg-igBg/90 backdrop-blur-md border-b border-igBorder px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-            <span class="text-xl font-bold bg-ig-gradient bg-clip-text text-transparent italic">Instagram</span>
-            <span class="text-xs bg-igBorder text-igGrayText px-2 py-0.5 rounded-full font-mono">Tasks v1.0</span>
-        </div>
-        <button onclick="toggleKeyModal()" class="text-xs bg-igCard hover:bg-igBorder text-igGrayText px-2.5 py-1.5 rounded-lg border border-igBorder flex items-center space-x-1.5 transition">
-            <i class="fa-solid fa-key text-yellow-500"></i>
-            <span id="keyStatusBadge">Clé API</span>
-        </button>
-    </header>
+  <div class="card">
+    <h2>Instagram</h2>
+    <div class="subtitle">Gestionnaire de Tâches & Alertes</div>
 
-    <!-- Top Tab Selection Buttons -->
-    <div class="p-3 bg-igBg border-b border-igBorder grid grid-cols-2 gap-2">
-        <button id="tabBtnNotif" onclick="switchTab('notif')" class="py-2.5 px-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-ig-gradient text-white shadow-lg">
-            <i class="fa-regular fa-bell"></i>
-            <span>Tester notifications</span>
-        </button>
-        <button id="tabBtnTodo" onclick="switchTab('todo')" class="py-2.5 px-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-igCard border border-igBorder text-igGrayText hover:text-white">
-            <i class="fa-solid fa-list-check"></i>
-            <span>To Do List</span>
-        </button>
+    <!-- Clé API Gemini globale -->
+    <input type="password" id="api-key" placeholder="Entrée clé API Gemini (pour l'IA)">
+
+    <!-- MENU PRINCIPAL -->
+    <div id="menu-section" class="section active">
+      <button id="goto-notif" class="btn-notif">🔔 Tester les notifications</button>
+      <button id="goto-todo" class="btn-todo">📋 To Do List & Vérif IA</button>
     </div>
 
-    <!-- MAIN CONTENT CONTAINERS -->
-    <main class="flex-1 p-4 pb-20 custom-scrollbar overflow-y-auto">
-
-        <!-- VUE 1: NOTIFICATION TESTER -->
-        <section id="viewNotif" class="space-y-4">
-            <div class="bg-igCard border border-igBorder rounded-2xl p-4 shadow-xl">
-                <h2 class="text-lg font-bold mb-1 flex items-center space-x-2">
-                    <i class="fa-solid fa-sliders text-igBlue"></i>
-                    <span>Tester les Notifications System</span>
-                </h2>
-                <p class="text-xs text-igGrayText mb-4">Simulez des alertes Instagram sur votre appareil via Service Worker.</p>
-
-                <!-- Permission status banner -->
-                <div id="permissionBanner" class="p-3 mb-4 rounded-xl text-xs flex items-center justify-between border bg-yellow-950/40 border-yellow-800/50 text-yellow-200">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-base"></i>
-                        <span id="permText">Permission non accordée</span>
-                    </div>
-                    <button onclick="requestNotificationPermission()" class="bg-yellow-500 text-black px-3 py-1 rounded-lg font-bold hover:bg-yellow-400 transition">
-                        Autoriser
-                    </button>
-                </div>
-
-                <!-- Form Type Notif -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-igGrayText mb-2 uppercase tracking-wider">Type d'interaction</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="notifType" value="like" checked class="peer hidden">
-                                <div class="p-3 rounded-xl border border-igBorder bg-igBg peer-checked:border-pink-500 peer-checked:bg-pink-500/10 flex items-center space-x-2 transition">
-                                    <i class="fa-solid fa-heart text-pink-500"></i>
-                                    <span class="text-sm font-medium">J'aime</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="notifType" value="comment" class="peer hidden">
-                                <div class="p-3 rounded-xl border border-igBorder bg-igBg peer-checked:border-igBlue peer-checked:bg-igBlue/10 flex items-center space-x-2 transition">
-                                    <i class="fa-solid fa-comment text-igBlue"></i>
-                                    <span class="text-sm font-medium">Commentaire</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="notifType" value="dm" class="peer hidden">
-                                <div class="p-3 rounded-xl border border-igBorder bg-igBg peer-checked:border-purple-500 peer-checked:bg-purple-500/10 flex items-center space-x-2 transition">
-                                    <i class="fa-solid fa-paper-plane text-purple-500"></i>
-                                    <span class="text-sm font-medium">Message direct</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="notifType" value="follower" class="peer hidden">
-                                <div class="p-3 rounded-xl border border-igBorder bg-igBg peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 flex items-center space-x-2 transition">
-                                    <i class="fa-solid fa-user-plus text-emerald-500"></i>
-                                    <span class="text-sm font-medium">Abonné</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Input Custom Text -->
-                    <div>
-                        <label class="block text-xs font-semibold text-igGrayText mb-1">Emetteur / Message personnalisé (Optionnel)</label>
-                        <input type="text" id="notifSender" placeholder="ex: alex_insta" class="w-full bg-igBg border border-igBorder rounded-xl p-2.5 text-sm focus:outline-none focus:border-igBlue mb-2">
-                        <input type="text" id="notifContent" placeholder="Texte de l'alerte..." class="w-full bg-igBg border border-igBorder rounded-xl p-2.5 text-sm focus:outline-none focus:border-igBlue">
-                    </div>
-
-                    <button onclick="sendTestNotification()" class="w-full py-3 bg-igBlue hover:bg-igBlueHover text-white font-semibold rounded-xl transition flex items-center justify-center space-x-2 shadow-lg">
-                        <i class="fa-regular fa-paper-plane"></i>
-                        <span>Envoyer l'alerte maintenant</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- VUE 2: TO DO LIST WITH AI VERIFICATION -->
-        <section id="viewTodo" class="space-y-4 hidden">
-            <!-- Form: Create New Task -->
-            <div class="bg-igCard border border-igBorder rounded-2xl p-4 shadow-xl">
-                <h2 class="text-sm font-bold uppercase tracking-wider text-igGrayText mb-3 flex items-center space-x-2">
-                    <i class="fa-solid fa-circle-plus text-igBlue"></i>
-                    <span>Nouvelle tâche interactive</span>
-                </h2>
-                <div class="space-y-3">
-                    <input type="text" id="taskTitle" placeholder="Titre (ex: Ranger mon bureau)" class="w-full bg-igBg border border-igBorder rounded-xl p-2.5 text-sm focus:outline-none focus:border-igBlue">
-                    <textarea id="taskDesc" rows="2" placeholder="Consigne pour l'IA (ex: Le bureau doit être propre sans tasses)" class="w-full bg-igBg border border-igBorder rounded-xl p-2.5 text-sm focus:outline-none focus:border-igBlue text-xs"></textarea>
-                    
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs text-igGrayText whitespace-nowrap">Rappel automatique :</label>
-                        <select id="taskInterval" class="bg-igBg border border-igBorder text-xs rounded-xl p-2.5 flex-1 focus:outline-none focus:border-igBlue">
-                            <option value="10">Toutes les 10 secondes (Test rapide)</option>
-                            <option value="30">Toutes les 30 secondes</option>
-                            <option value="60">Toutes les 1 minute</option>
-                            <option value="300">Toutes les 5 minutes</option>
-                            <option value="0">Désactivé</option>
-                        </select>
-                    </div>
-
-                    <button onclick="addNewTask()" class="w-full py-2.5 bg-ig-gradient text-white font-semibold rounded-xl hover:opacity-90 transition text-sm flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Ajouter la tâche avec rappels</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Task List Header -->
-            <div class="flex items-center justify-between pt-2">
-                <span class="text-xs font-bold text-igGrayText uppercase tracking-wider">Mes Tâches</span>
-                <span id="taskCounter" class="text-xs bg-igBorder px-2 py-0.5 rounded-full text-igGrayText">0 tâche</span>
-            </div>
-
-            <!-- Task Items Container -->
-            <div id="taskList" class="space-y-3">
-                <!-- Task Cards will be rendered here dynamically -->
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Modal for Gemini API Key -->
-    <div id="keyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-igCard border border-igBorder w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-lg flex items-center space-x-2">
-                    <i class="fa-solid fa-key text-yellow-500"></i>
-                    <span>Clé API Google Gemini</span>
-                </h3>
-                <button onclick="toggleKeyModal()" class="text-igGrayText hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <p class="text-xs text-igGrayText leading-relaxed">
-                La clé est nécessaire pour analyser les photos soumises via le modèle <code class="text-pink-400">gemini-2.5-flash</code>. Elle sera stockée localement dans votre navigateur.
-            </p>
-            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-igBg border border-igBorder rounded-xl p-3 text-sm focus:outline-none focus:border-igBlue">
-            <div class="flex space-x-2">
-                <button onclick="saveApiKey()" class="flex-1 py-2.5 bg-igBlue hover:bg-igBlueHover text-white font-semibold rounded-xl text-sm transition">
-                    Enregistrer
-                </button>
-            </div>
-        </div>
+    <!-- SECTION 1 : TEST NOTIFICATIONS -->
+    <div id="notif-section" class="section">
+      <button id="btn-perm" class="btn-notif">1. Activer les autorisations</button>
+      <button id="btn-test-notif" class="btn-todo">2. Envoyer une alerte test</button>
+      <button class="btn-back" onclick="switchSection('menu-section')">← Retour</button>
     </div>
 
-    <!-- Hidden Input for Camera Capture -->
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageCaptured(event)">
+    <!-- SECTION 2 : TO DO LIST & IA -->
+    <div id="todo-section" class="section">
+      <div style="font-size: 13px; color: #fff; margin-bottom: 8px; text-align: left;">Tâche active : <b>"Ranger son bureau"</b></div>
+      
+      <label for="file-input" class="upload-label">📸 Photo de preuve (IA)</label>
+      <input type="file" id="file-input" accept="image/*" capture="environment">
 
-    <!-- Service Worker Inline Registration Script -->
-    <script>
-        // Register Service Worker using Blob
-        const swContent = `
-            self.addEventListener('notificationclick', function(event) {
-                event.notification.close();
-                event.waitUntil(
-                    clients.matchAll({ type: 'window' }).then(function(clientList) {
-                        for (var i = 0; i < clientList.length; i++) {
-                            var client = clientList[i];
-                            if (client.url == '/' && 'focus' in client)
-                                return client.focus();
-                        }
-                        if (clients.openWindow)
-                            return clients.openWindow('/');
-                    })
-                );
-            });
-        `;
+      <img id="preview" alt="Aperçu de la photo">
+      
+      <button class="btn-back" onclick="switchSection('menu-section')">← Retour</button>
+    </div>
 
-        async function initServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    const blob = new Blob([swContent], { type: 'application/javascript' });
-                    const swUrl = URL.createObjectURL(blob);
-                    await navigator.serviceWorker.register(swUrl);
-                    console.log('SW Registered successfully');
-                } catch (err) {
-                    console.error('SW Registration failed:', err);
-                }
-            }
+    <div id="status" class="status">Prêt</div>
+  </div>
+
+  <script type="module">
+    import { GoogleGenAI } from "@google/genai";
+
+    const statusDiv = document.getElementById('status');
+    const apiKeyInput = document.getElementById('api-key');
+    const fileInput = document.getElementById('file-input');
+    const previewImg = document.getElementById('preview');
+
+    // Navigation entre les écrans
+    window.switchSection = function(sectionId) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+      statusDiv.innerText = "Prêt";
+    }
+
+    document.getElementById('goto-notif').addEventListener('click', () => switchSection('notif-section'));
+    document.getElementById('goto-todo').addEventListener('click', () => switchSection('todo-section'));
+
+    // Enregistrement du Service Worker
+    async function initSW() {
+      if ('serviceWorker' in navigator) {
+        try {
+          await navigator.serviceWorker.register('./sw.js');
+        } catch (err) {
+          console.error("Erreur SW", err);
         }
-        initServiceWorker();
-    </script>
+      }
+    }
+    initSW();
 
-    <!-- Main Logic Script -->
-    <script>
-        // App State
-        let apiKey = localStorage.getItem('gemini_api_key') || '';
-        let tasks = JSON.parse(localStorage.getItem('insta_tasks') || '[]');
-        let activeIntervals = {};
-        let currentVerifyingTaskId = null;
+    // Demande de permission notifications
+    document.getElementById('btn-perm').addEventListener('click', async () => {
+      const perm = await Notification.requestPermission();
+      statusDiv.innerText = perm === 'granted' ? "Notifications autorisées !" : "Permission refusée.";
+    });
 
-        // Icons map for Instagram Notification Types
-        const notifIcons = {
-            like: 'https://cdn-icons-png.flaticon.com/512/1077/1077035.png',
-            comment: 'https://cdn-icons-png.flaticon.com/512/1384/1384007.png',
-            dm: 'https://cdn-icons-png.flaticon.com/512/5968/5968771.png',
-            follower: 'https://cdn-icons-png.flaticon.com/512/929/929564.png',
-            task: 'https://cdn-icons-png.flaticon.com/512/833/833472.png',
-            done: 'https://cdn-icons-png.flaticon.com/512/190/190411.png'
-        };
+    // Test notification manuelle
+    document.getElementById('btn-test-notif').addEventListener('click', async () => {
+      if (Notification.permission !== 'granted') {
+        alert("Veuillez d'abord autoriser les notifications !");
+        return;
+      }
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification("Instagram", {
+          body: "Ceci est un test d'alerte système !",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+          vibrate: [200, 100, 200],
+          tag: "insta-test"
+        });
+        statusDiv.innerText = "Notification envoyée !";
+      } catch (err) {
+        statusDiv.innerText = "Erreur : " + err.message;
+      }
+    });
 
-        // Initialize App on DOM Load
-        window.addEventListener('DOMContentLoaded', () => {
-            updateKeyBadge();
-            checkNotificationPermissionStatus();
-            renderTasks();
-            startAllTaskIntervals();
+    // Analyse de la photo par Gemini pour la To-Do List
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) {
+        alert("Veuillez renseigner votre clé API Gemini en haut de la page !");
+        fileInput.value = "";
+        return;
+      }
+
+      previewImg.src = URL.createObjectURL(file);
+      previewImg.style.display = 'block';
+      statusDiv.innerText = "Analyse de la photo par l'IA...";
+
+      try {
+        const ai = new GoogleGenAI({ apiKey: apiKey });
+        
+        // Conversion de l'image en base64
+        const base64Data = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
         });
 
-        // Tab Navigation
-        function switchTab(tab) {
-            const btnNotif = document.getElementById('tabBtnNotif');
-            const btnTodo = document.getElementById('tabBtnTodo');
-            const viewNotif = document.getElementById('viewNotif');
-            const viewTodo = document.getElementById('viewTodo');
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            { inlineData: { data: base64Data, mimeType: file.type } },
+            "Analyse cette photo par rapport à la tâche 'Ranger son bureau'. Réponds STRICTEMENT par 'OUI' si le bureau est rangé, ou par 'NON' si c'est en désordre."
+          ],
+        });
 
-            if (tab === 'notif') {
-                btnNotif.className = "py-2.5 px-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-ig-gradient text-white shadow-lg";
-                btnTodo.className = "py-2.5 px-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-igCard border border-igBorder text-igGrayText hover:text-white";
-                viewNotif.classList.remove('hidden');
-                viewTodo.classList.add('hidden');
-            } else {
-                btnTodo.className = "py-2.5 px-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-ig-gradient text-white shadow-lg";
-                btnNotif.className = "py-2.5 px-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center space-x-2 bg-igCard border border-igBorder text-igGrayText hover:text-white";
-                viewTodo.classList.remove('hidden');
-                viewNotif.classList.add('hidden');
-            }
+        const resultText = response.text.trim();
+
+        if (resultText.toUpperCase().startsWith('OUI')) {
+          statusDiv.innerText = "Tâche validée par l'IA ! 🎉";
+          
+          // Déclencher la notification de succès
+          const reg = await navigator.serviceWorker.ready;
+          if (reg) {
+            reg.showNotification("Instagram - Tâche accomplie", {
+              body: "Félicitations ! L'IA a validé votre tâche.",
+              icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+              tag: "ai-success"
+            });
+          }
+        } else {
+          statusDiv.innerText = "Refusé par l'IA : La tâche n'a pas l'air complète.";
         }
 
-        // Gemini Key Management
-        function toggleKeyModal() {
-            const modal = document.getElementById('keyModal');
-            document.getElementById('apiKeyInput').value = apiKey;
-            modal.classList.toggle('hidden');
-        }
-
-        function saveApiKey() {
-            const inputVal = document.getElementById('apiKeyInput').value.trim();
-            apiKey = inputVal;
-            localStorage.setItem('gemini_api_key', apiKey);
-            updateKeyBadge();
-            toggleKeyModal();
-        }
-
-        function updateKeyBadge() {
-            const badge = document.getElementById('keyStatusBadge');
-            if (apiKey) {
-                badge.innerText = "Clé API OK";
-                badge.classList.remove('text-igGrayText');
-                badge.classList.add('text-emerald-400');
-            } else {
-                badge.innerText = "Configurer Clé";
-                badge.classList.remove('text-emerald-400');
-                badge.classList.add('text-igGrayText');
-            }
-        }
-
-        // Notification Permissions
-        async function checkNotificationPermissionStatus() {
-            const banner = document.getElementById('permissionBanner');
-            const permText = document.getElementById('permText');
-
-            if (!('Notification' in window)) {
-                banner.className = "p-3 mb-4 rounded-xl text-xs flex items-center justify-between border bg-red-950/40 border-red-800/50 text-red-200";
-                permText.innerText = "Notifications non supportées sur ce navigateur.";
-                return;
-            }
-
-            if (Notification.permission === 'granted') {
-                banner.className = "p-3 mb-4 rounded-xl text-xs flex items-center justify-between border bg-emerald-950/40 border-emerald-800/50 text-emerald-200";
-                permText.innerText = "Permission accordée ! Alertes actives.";
-            } else if (Notification.permission === 'denied') {
-                banner.className = "p-3 mb-4 rounded-xl text-xs flex items-center justify-between border bg-red-950/40 border-red-800/50 text-red-200";
-                permText.innerText = "Permission bloquée. Modifiez vos paramètres navigateur.";
-            }
-        }
-
-        async function requestNotificationPermission() {
-            if ('Notification' in window) {
-                const permission = await Notification.requestPermission();
-                checkNotificationPermissionStatus();
-            }
-        }
-
-        // Trigger Notification using Service Worker Registration
-        async function triggerSystemNotification(title, options) {
-            if (!('Notification' in window) || Notification.permission !== 'granted') {
-                console.log('Notification refused or not granted.');
-                return;
-            }
-
-            tr
+      } catch (err) {
+        statusDiv.innerText = "Erreur IA : " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
