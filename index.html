@@ -277,7 +277,7 @@
       localStorage.setItem('insta_todos', JSON.stringify(todos));
     }
 
-    document.getElementById('add-todo-btn').addEventListener('click', () => {
+    function addTodo() {
       const input = document.getElementById('new-todo-input');
       const text = input.value.trim();
       if (text) {
@@ -285,6 +285,11 @@
         input.value = '';
         renderTodos();
       }
+    }
+
+    document.getElementById('add-todo-btn').addEventListener('click', addTodo);
+    document.getElementById('new-todo-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addTodo();
     });
 
     window.deleteTodo = function(index) {
@@ -329,7 +334,7 @@
         });
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: [
             { inlineData: { data: base64Data, mimeType: file.type } },
             `Analyse cette photo pour la tâche suivante : '${currentTaskToVerify.text}'. Réponds STRICTEMENT par 'OUI' si l'image prouve que la tâche est réalisée, ou 'NON' si ce n'est pas le cas.`
