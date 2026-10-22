@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Notification Mobile</title>
+  <title>Instagram - Notifications</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #121212;
-      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #fafafa;
+      color: #262626;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -19,45 +19,55 @@
       box-sizing: border-box;
     }
     .card {
-      background: #1e1e1e;
-      padding: 24px;
-      border-radius: 12px;
-      max-width: 400px;
+      background: #ffffff;
+      border: 1px solid #dbdbdb;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 350px;
       width: 100%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      font-family: 'Billabong', sans-serif;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #000;
     }
     button {
       width: 100%;
-      padding: 14px;
-      margin-top: 12px;
+      padding: 10px;
+      margin-top: 10px;
       border: none;
-      border-radius: 8px;
-      font-weight: bold;
+      border-radius: 4px;
+      font-weight: 600;
       cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-primary {
       background-color: #0095f6;
       color: white;
-      font-size: 15px;
     }
-    button:active { background-color: #1877f2; }
+    .btn-secondary {
+      background-color: transparent;
+      color: #0095f6;
+      border: 1px solid #dbdbdb;
+    }
     .status {
-      font-size: 13px;
-      color: #a8a8a8;
+      font-size: 12px;
+      color: #8e8e8e;
       margin-bottom: 15px;
-      padding: 8px;
-      background: #262626;
-      border-radius: 6px;
     }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>Notification Instagram</h2>
-    <div id="status" class="status">Initialisation...</div>
+    <h2>Instagram</h2>
+    <div id="status" class="status">Vérification des permissions...</div>
 
-    <button id="btn-perm">1. Autoriser les notifications</button>
-    <button id="btn-show">2. Envoyer la vraie notification</button>
+    <button id="btn-perm" class="btn-secondary">1. Activer les notifications</button>
+    <button id="btn-show" class="btn-primary">2. Simuler une alerte</button>
   </div>
 
   <script>
@@ -65,7 +75,7 @@
     const btnPerm = document.getElementById('btn-perm');
     const btnShow = document.getElementById('btn-show');
 
-    // 1. Enregistrement dynamique du Service Worker via un Blob
+    // Enregistrement d'un Service Worker virtuel pour autoriser l'affichage mobile
     const swCode = `
       self.addEventListener('notificationclick', function(event) {
         event.notification.close();
@@ -80,58 +90,15 @@
     const blob = new Blob([swCode], { type: 'application/javascript' });
     const swUrl = URL.createObjectURL(blob);
 
-    async function registerSW() {
+    async function initSW() {
       if ('serviceWorker' in navigator) {
         try {
-          const reg = await navigator.serviceWorker.register(swUrl);
-          statusDiv.innerText = "Prêt (Service Worker actif)";
-          return reg;
+          await navigator.serviceWorker.register(swUrl);
+          statusDiv.innerText = "Prêt à envoyer des alertes";
         } catch (err) {
-          statusDiv.innerText = "Erreur SW : " + err.message;
+          statusDiv.innerText = "Erreur : " + err.message;
         }
-      } else {
-        statusDiv.innerText = "Service Worker non supporté.";
       }
     }
 
-    // Demande de permission
-    btnPerm.addEventListener('click', async () => {
-      if ('Notification' in window) {
-        const perm = await Notification.requestPermission();
-        statusDiv.innerText = "Permission : " + perm;
-        if (perm === 'granted') {
-          alert("Permission accordée ! Vous pouvez cliquer sur le bouton 2.");
-        } else {
-          alert("La permission a été refusée dans le navigateur.");
-        }
-      } else {
-        alert("Les notifications ne sont pas supportées.");
-      }
-    });
-
-    // Envoi de la notification via le Service Worker
-    btnShow.addEventListener('click', async () => {
-      if (Notification.permission !== 'granted') {
-        alert("Cliquez d'abord sur '1. Autoriser les notifications'");
-        return;
-      }
-
-      const reg = await navigator.serviceWorker.ready;
-      if (reg) {
-        reg.showNotification("Instagram", {
-          body: "charlotte_g33k a aimé votre photo.",
-          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-          badge: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-          vibrate: [200, 100, 200],
-          tag: "insta-test"
-        });
-      } else {
-        alert("Le Service Worker n'est pas encore prêt.");
-      }
-    });
-
-    // Initialisation au chargement
-    registerSW();
-  </script>
-</body>
-</html>
+    //
