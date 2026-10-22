@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram - Test Notifications</title>
+  <title>Instagram</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #000000;
-      color: #f5f5f5;
+      color: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -16,7 +16,6 @@
       min-height: 100vh;
       margin: 0;
       padding: 20px;
-      box-sizing: border-box;
     }
     .card {
       background: #121212;
@@ -26,137 +25,68 @@
       max-width: 350px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
     }
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 8px;
-      color: #ffffff;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .subtitle {
-      font-size: 13px;
-      color: #a8a8a8;
-      margin-bottom: 25px;
-    }
+    h2 { font-size: 1.8rem; margin-bottom: 20px; }
     button {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       margin-top: 12px;
       border: none;
       border-radius: 8px;
-      font-weight: 600;
+      font-weight: bold;
       cursor: pointer;
-      font-size: 14px;
-      transition: background 0.2s;
+      font-size: 15px;
     }
-    .btn-primary {
-      background-color: #0095f6;
-      color: white;
-    }
-    .btn-primary:active {
-      background-color: #1877f2;
-    }
-    .btn-secondary {
-      background-color: #262626;
-      color: #ffffff;
-      border: 1px solid #363636;
-    }
-    .status {
-      font-size: 12px;
-      color: #0095f6;
-      margin-top: 15px;
-      padding: 8px;
-      background: #1a1a1a;
-      border-radius: 6px;
-    }
+    .btn-perm { background-color: #262626; color: white; border: 1px solid #363636; }
+    .btn-show { background-color: #0095f6; color: white; }
+    .status { font-size: 13px; color: #a8a8a8; margin-top: 15px; }
   </style>
 </head>
 <body>
 
   <div class="card">
     <h2>Instagram</h2>
-    <div class="subtitle">Simulateur d'alertes</div>
-    
-    <button id="btn-perm" class="btn-secondary">1. Activer les notifications</button>
-    <button id="btn-show" class="btn-primary">2. Envoyer l'alerte</button>
-
-    <div id="status" class="status">Prêt</div>
+    <button id="btn-perm" class="btn-perm">1. Activer les notifications</button>
+    <button id="btn-show" class="btn-show">2. Envoyer la notification</button>
+    <div id="status" class="status">En attente...</div>
   </div>
 
   <script>
     const statusDiv = document.getElementById('status');
-    const btnPerm = document.getElementById('btn-perm');
-    const btnShow = document.getElementById('btn-show');
 
-    // Enregistrement propre d'un Service Worker inline
-    async function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        try {
-          const swCode = `
-            self.addEventListener('notificationclick', function(event) {
-              event.notification.close();
-              event.waitUntil(
-                clients.matchAll({ type: 'window' }).then(function(clientList) {
-                  if (clientList.length > 0) return clientList[0].focus();
-                  return clients.openWindow('/');
-                })
-              );
-            });
-          `;
-          const blob = new Blob([swCode], { type: 'application/javascript' });
-          const swUrl = URL.createObjectURL(blob);
-          
-          await navigator.serviceWorker.register(swUrl);
-          statusDiv.innerText = "Service Worker actif";
-        } catch (err) {
-          statusDiv.innerText = "Erreur SW : " + err.message;
-        }
-      } else {
-        statusDiv.innerText = "Non supporté par le navigateur";
-      }
-    }
-
-    // Demande de permission
-    btnPerm.addEventListener('click', async () => {
+    document.getElementById('btn-perm').addEventListener('click', async () => {
       if (!('Notification' in window)) {
-        alert("Les notifications ne sont pas supportées.");
+        statusDiv.innerText = "Non supporté";
         return;
       }
       const perm = await Notification.requestPermission();
-      if (perm === 'granted') {
-        statusDiv.innerText = "Permissions accordées !";
-      } else {
-        statusDiv.innerText = "Permission refusée : " + perm;
-      }
+      statusDiv.innerText = "Permission : " + perm;
     });
 
-    // Déclenchement de la notification
-    btnShow.addEventListener('click', async () => {
+    document.getElementById('btn-show').addEventListener('click', () => {
       if (Notification.permission !== 'granted') {
-        alert("Veuillez d'abord autoriser les notifications (Étape 1).");
+        alert("Veuillez d'abord autoriser les notifications !");
         return;
       }
 
+      // Déclenchement direct via l'API standard
       try {
-        const registration = await navigator.serviceWorker.ready;
-        if (registration) {
-          registration.showNotification("Instagram", {
-            body: "charlotte_g33k a aimé votre photo.",
-            icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-            badge: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-            vibrate: [200, 100, 200],
-            tag: "insta-alert"
-          });
-          statusDiv.innerText = "Notification envoyée !";
-        }
+        const notif = new Notification("Instagram", {
+          body: "charlotte_g33k a aimé votre photo.",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+          tag: "insta-direct"
+        });
+        
+        notif.onclick = function() {
+          window.focus();
+          notif.close();
+        };
+
+        statusDiv.innerText = "Notification déclenchée !";
       } catch (err) {
-        alert("Erreur lors de l'envoi : " + err.message);
+        statusDiv.innerText = "Erreur : " + err.message;
       }
     });
-
-    registerServiceWorker();
   </script>
 </body>
 </html>
