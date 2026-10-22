@@ -225,6 +225,16 @@
     const fileInput = document.getElementById('file-input');
     const previewImg = document.getElementById('preview');
 
+    // --- GESTION DE LA CLE API (LOCALSTORAGE) ---
+    const savedApiKey = localStorage.getItem('gemini_api_key');
+    if (savedApiKey) {
+      apiKeyInput.value = savedApiKey;
+    }
+
+    apiKeyInput.addEventListener('input', () => {
+      localStorage.setItem('gemini_api_key', apiKeyInput.value.trim());
+    });
+
     // --- NAVIGATION ---
     window.switchSection = function(sectionId) {
       document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
@@ -343,6 +353,21 @@
       });
     }
 
+    // --- TRADUCTION DES ERREURS IA ---
+    function formatAiError(err) {
+      const msg = err.message || "";
+      if (msg.includes("503") || msg.includes("UNAVAILABLE")) {
+        return "⚠️ Serveur IA surchargé : Réessayez dans quelques secondes.";
+      }
+      if (msg.includes("400") || msg.includes("API key")) {
+        return "❌ Clé API invalide : Vérifiez votre clé Gemini.";
+      }
+      if (msg.includes("429")) {
+        return "⏳ Limite de requêtes atteinte : Patientez un instant.";
+      }
+      return "⚠️ Erreur de vérification : " + msg;
+    }
+
     // --- VERIFICATION IA (GEMINI) ---
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
@@ -358,7 +383,6 @@
       statusDiv.innerText = "Optimisation de l'image...";
 
       try {
-        // Redimensionnement de l'image pour éviter le problème de mémoire
         const compressed = await compressImage(file, 1024, 0.7);
         previewImg.src = compressed.dataUrl;
         previewImg.style.display = 'block';
@@ -377,6 +401,7 @@
         const resultText = response.text.trim();
 
         if (resultText.toUpperCase().startsWith('OUI')) {
+          const completedTaskName = currentTaskToVerify.text;
           currentTaskToVerify.completed = true;
           renderTodos();
           document.getElementById('ai-verify-box').style.display = 'none';
@@ -385,19 +410,19 @@
 
           const reg = await navigator.serviceWorker.ready;
           if (reg) {
-            reg.showNotification("Instagram - Tâche accomplie", {
-              body: `Félicitations ! L'IA a validé '${currentTaskToVerify.text}'.`,
+            reg.showNotification(`Tâche validée : ${completedTaskName}`, {
+              body: `L'IA a confirmé que la tâche "${completedTaskName}" est bien terminée !`,
               icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
               vibrate: [200, 100, 200],
               tag: "ai-task-done"
             });
           }
         } else {
-          statusDiv.innerText = "Refusé par l'IA : La photo ne prouve pas que la tâche est faite.";
+          statusDiv.innerText = "❌ Non validé : L'IA estime que la tâche n'est pas encore terminée.";
         }
 
       } catch (err) {
-        statusDiv.innerText = "Erreur IA : " + err.message;
+        statusDiv.innerText = formatAiError(err);
       }
     });
 
