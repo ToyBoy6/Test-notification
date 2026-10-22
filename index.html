@@ -1,271 +1,162 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram Notification Simulator</title>
-  <!-- Tailwind CSS via CDN for styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            instaDark: '#000000',
-            instaCard: '#121212',
-            instaBorder: '#262626',
-            instaButton: '#0095f6',
-            instaButtonHover: '#1877f2',
-            instaPink: '#e1306c',
-            instaPurple: '#833ab4',
-            instaOrange: '#fd1d1d'
-          }
-        }
-      }
-    }
-  </script>
+  <title>Instagram - Test Notifications</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #000000;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
-    .insta-gradient-bg {
-      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    .card {
+      background: #121212;
+      border: 1px solid #262626;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 350px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
     }
-    .insta-gradient-text {
-      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #a8a8a8;
+      margin-bottom: 25px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background-color: #0095f6;
+      color: white;
+    }
+    .btn-primary:active {
+      background-color: #1877f2;
+    }
+    .btn-secondary {
+      background-color: #262626;
+      color: #ffffff;
+      border: 1px solid #363636;
+    }
+    .status {
+      font-size: 12px;
+      color: #0095f6;
+      margin-top: 15px;
+      padding: 8px;
+      background: #1a1a1a;
+      border-radius: 6px;
     }
   </style>
 </head>
-<body class="bg-instaDark text-gray-100 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-instaPink selection:text-white">
+<body>
 
-  <main class="w-full max-w-md bg-instaCard border border-instaBorder rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+  <div class="card">
+    <h2>Instagram</h2>
+    <div class="subtitle">Simulateur d'alertes</div>
     
-    <!-- Header Logo / Title -->
-    <div class="text-center space-y-2">
-      <div class="inline-flex items-center justify-center p-3 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 mb-2 shadow-lg">
-        <!-- Instagram SVG Icon -->
-        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-        </svg>
-      </div>
-      <h1 class="text-2xl font-bold tracking-tight">Instagram Simulator</h1>
-      <p class="text-xs text-gray-400">Générez et testez de vraies notifications système dans un environnement sombre et apaisant pour vos yeux.</p>
-    </div>
+    <button id="btn-perm" class="btn-secondary">1. Activer les notifications</button>
+    <button id="btn-show" class="btn-primary">2. Envoyer l'alerte</button>
 
-    <!-- Status Badge -->
-    <div class="flex items-center justify-between bg-black/40 border border-instaBorder rounded-xl p-3 text-xs">
-      <span class="text-gray-400 font-medium">Statut Service Worker / API :</span>
-      <span id="status-badge" class="px-2.5 py-1 rounded-full font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-        En attente
-      </span>
-    </div>
-
-    <!-- Preset Selection -->
-    <div class="space-y-2">
-      <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Type de notification</label>
-      <select id="preset-select" class="w-full bg-black/60 border border-instaBorder rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-instaPink transition">
-        <option value="like">❤️ Like : charlotte_g33k a aimé votre photo.</option>
-        <option value="comment">💬 Commentaire : alex_dev a identifié votre compte.</option>
-        <option value="message">📩 Message : sara_m vous a envoyé un message direct.</option>
-        <option value="follow">👤 Abonnement : lucas_photo a commencé à vous suivre.</option>
-      </select>
-    </div>
-
-    <!-- Delay Selection -->
-    <div class="space-y-2">
-      <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">Délai de déclenchement</label>
-      <div class="grid grid-cols-3 gap-2">
-        <button type="button" data-delay="0" class="delay-btn border border-instaPink bg-instaPink/10 text-instaPink font-semibold py-2 rounded-xl text-xs transition">Immédiat</button>
-        <button type="button" data-delay="3" class="delay-btn border border-instaBorder bg-black/40 text-gray-400 font-semibold py-2 rounded-xl text-xs hover:border-gray-500 transition">3s</button>
-        <button type="button" data-delay="5" class="delay-btn border border-instaBorder bg-black/40 text-gray-400 font-semibold py-2 rounded-xl text-xs hover:border-gray-500 transition">5s</button>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="space-y-3 pt-2">
-      <button id="btn-perm" class="w-full py-3 px-4 rounded-xl font-semibold text-sm border border-instaBorder bg-black/60 hover:bg-black/90 text-gray-200 hover:text-white transition active:scale-[0.98]">
-        1. Autoriser les notifications
-      </button>
-
-      <button id="btn-trigger" class="w-full py-3.5 px-4 rounded-xl font-semibold text-sm text-white insta-gradient-bg shadow-lg hover:opacity-95 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-        2. Envoyer la notification
-      </button>
-    </div>
-
-    <!-- Info / Footer Note -->
-    <div class="text-center pt-2 border-t border-instaBorder/60">
-      <p class="text-[11px] text-gray-500">
-        🌙 Mode Sombre actif • Adapté pour mobiles & écrans OLED.
-      </p>
-    </div>
-  </main>
+    <div id="status" class="status">Prêt</div>
+  </div>
 
   <script>
-    // State management
-    let selectedDelay = 0;
-    const statusBadge = document.getElementById('status-badge');
+    const statusDiv = document.getElementById('status');
     const btnPerm = document.getElementById('btn-perm');
-    const btnTrigger = document.getElementById('btn-trigger');
-    const presetSelect = document.getElementById('preset-select');
-    const delayBtns = document.querySelectorAll('.delay-btn');
+    const btnShow = document.getElementById('btn-show');
 
-    // Instagram Notifications Config Map
-    const presets = {
-      like: {
-        title: "Instagram",
-        body: "charlotte_g33k a aimé votre photo.",
-        icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-        tag: "insta-like"
-      },
-      comment: {
-        title: "Instagram",
-        body: "alex_dev vous a mentionné dans un commentaire : 'Super shot ! 🔥'",
-        icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-        tag: "insta-comment"
-      },
-      message: {
-        title: "Instagram",
-        body: "sara_m vous a envoyé un message : 'On se voit ce soir ?'",
-        icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-        tag: "insta-message"
-      },
-      follow: {
-        title: "Instagram",
-        body: "lucas_photo a commencé à vous suivre.",
-        icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
-        tag: "insta-follow"
-      }
-    };
-
-    // Inline Service Worker Code Registration
-    const swCode = `
-      self.addEventListener('notificationclick', function(event) {
-        event.notification.close();
-        event.waitUntil(
-          clients.matchAll({ type: 'window' }).then(function(clientList) {
-            if (clientList.length > 0) return clientList[0].focus();
-            return clients.openWindow('/');
-          })
-        );
-      });
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-
-    // Initialize Service Worker
-    async function initSW() {
+    // Enregistrement propre d'un Service Worker inline
+    async function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
         try {
+          const swCode = `
+            self.addEventListener('notificationclick', function(event) {
+              event.notification.close();
+              event.waitUntil(
+                clients.matchAll({ type: 'window' }).then(function(clientList) {
+                  if (clientList.length > 0) return clientList[0].focus();
+                  return clients.openWindow('/');
+                })
+              );
+            });
+          `;
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(blob);
+          
           await navigator.serviceWorker.register(swUrl);
-          updatePermissionStatus();
+          statusDiv.innerText = "Service Worker actif";
         } catch (err) {
-          statusBadge.innerText = "Erreur SW";
-          statusBadge.className = "px-2.5 py-1 rounded-full font-semibold bg-red-500/10 text-red-400 border border-red-500/20";
+          statusDiv.innerText = "Erreur SW : " + err.message;
         }
       } else {
-        statusBadge.innerText = "SW Non Supporté";
-        statusBadge.className = "px-2.5 py-1 rounded-full font-semibold bg-red-500/10 text-red-400 border border-red-500/20";
+        statusDiv.innerText = "Non supporté par le navigateur";
       }
     }
 
-    // UI Status Update
-    function updatePermissionStatus() {
-      if (!('Notification' in window)) {
-        statusBadge.innerText = "Incompatible";
-        statusBadge.className = "px-2.5 py-1 rounded-full font-semibold bg-red-500/10 text-red-400 border border-red-500/20";
-        return;
-      }
-
-      if (Notification.permission === 'granted') {
-        statusBadge.innerText = "Autorisé";
-        statusBadge.className = "px-2.5 py-1 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-      } else if (Notification.permission === 'denied') {
-        statusBadge.innerText = "Bloqué";
-        statusBadge.className = "px-2.5 py-1 rounded-full font-semibold bg-red-500/10 text-red-400 border border-red-500/20";
-      } else {
-        statusBadge.innerText = "Non configuré";
-        statusBadge.className = "px-2.5 py-1 rounded-full font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
-      }
-    }
-
-    // Delay Selection UI Logic
-    delayBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        delayBtns.forEach(b => {
-          b.className = "delay-btn border border-instaBorder bg-black/40 text-gray-400 font-semibold py-2 rounded-xl text-xs hover:border-gray-500 transition";
-        });
-        btn.className = "delay-btn border border-instaPink bg-instaPink/10 text-instaPink font-semibold py-2 rounded-xl text-xs transition";
-        selectedDelay = parseInt(btn.getAttribute('data-delay'), 10);
-      });
-    });
-
-    // Request Permissions Button
+    // Demande de permission
     btnPerm.addEventListener('click', async () => {
       if (!('Notification' in window)) {
-        alert("Ce navigateur ne prend pas en compte l'API Notification.");
+        alert("Les notifications ne sont pas supportées.");
         return;
       }
       const perm = await Notification.requestPermission();
-      updatePermissionStatus();
+      if (perm === 'granted') {
+        statusDiv.innerText = "Permissions accordées !";
+      } else {
+        statusDiv.innerText = "Permission refusée : " + perm;
+      }
     });
 
-    // Trigger Notification Logic
-    btnTrigger.addEventListener('click', async () => {
+    // Déclenchement de la notification
+    btnShow.addEventListener('click', async () => {
       if (Notification.permission !== 'granted') {
-        alert("Veuillez autoriser les notifications d'abord (Bouton 1).");
+        alert("Veuillez d'abord autoriser les notifications (Étape 1).");
         return;
       }
 
-      const presetKey = presetSelect.value;
-      const config = presets[presetKey];
-
-      if (selectedDelay > 0) {
-        btnTrigger.disabled = true;
-        const originalText = btnTrigger.innerText;
-        let count = selectedDelay;
-        btnTrigger.innerText = `Déclenchement dans ${count}s...`;
-
-        const interval = setInterval(() => {
-          count--;
-          if (count > 0) {
-            btnTrigger.innerText = `Déclenchement dans ${count}s...`;
-          } else {
-            clearInterval(interval);
-            btnTrigger.disabled = false;
-            btnTrigger.innerText = originalText;
-            dispatchNotification(config);
-          }
-        }, 1000);
-      } else {
-        dispatchNotification(config);
-      }
-    });
-
-    // Dispatch System Notification via Service Worker
-    async function dispatchNotification(config) {
-      if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.ready;
-        if (reg) {
-          reg.showNotification(config.title, {
-            body: config.body,
-            icon: config.icon,
-            badge: config.icon,
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration) {
+          registration.showNotification("Instagram", {
+            body: "charlotte_g33k a aimé votre photo.",
+            icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+            badge: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
             vibrate: [200, 100, 200],
-            tag: config.tag,
-            renotify: true
+            tag: "insta-alert"
           });
+          statusDiv.innerText = "Notification envoyée !";
         }
+      } catch (err) {
+        alert("Erreur lors de l'envoi : " + err.message);
       }
-    }
-
-    // Initialize on load
-    window.addEventListener('load', () => {
-      initSW();
     });
+
+    registerServiceWorker();
   </script>
 </body>
 </html>
