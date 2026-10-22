@@ -39,6 +39,10 @@ Une application web mobile optimisée (PWA) conçue pour simuler des notificatio
 
 ---
 
+# Lien public : https://toyboy6.github.io/Test-notification/
+
+---
+
 ## 📁 Structure du projet
 
 ```text
@@ -46,8 +50,3 @@ Une application web mobile optimisée (PWA) conçue pour simuler des notificatio
 ├── index.html     # Application principale (UI & Logique)
 ├── sw.js          # Service Worker pour la gestion des notifications
 └── README.md      # Documentation du projet
-
----
-
-
-# Lien public : https://toyboy6.github.io/Test-notification/
