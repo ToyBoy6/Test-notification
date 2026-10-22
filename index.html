@@ -101,4 +101,41 @@
       }
     }
 
-    //
+    // Étape 1 : Demander la permission
+    btnPerm.addEventListener('click', async () => {
+      if (!('Notification' in window)) {
+        alert("Ce navigateur ne supporte pas les notifications.");
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        statusDiv.innerText = "Notifications autorisées !";
+        alert("Permission accordée avec succès.");
+      } else {
+        statusDiv.innerText = "Permission refusée.";
+      }
+    });
+
+    // Étape 2 : Déclencher la notification style Instagram
+    btnShow.addEventListener('click', async () => {
+      if (Notification.permission !== 'granted') {
+        alert("Veuillez d'abord autoriser les notifications (bouton 1).");
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      if (registration) {
+        registration.showNotification("Instagram", {
+          body: "charlotte_g33k a aimé votre photo.",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+          badge: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/132px-Instagram_logo_2016.svg.png",
+          vibrate: [200, 100, 200],
+          tag: "instagram-like"
+        });
+      }
+    });
+
+    initSW();
+  </script>
+</body>
+</html>
