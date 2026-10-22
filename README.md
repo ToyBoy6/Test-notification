@@ -1,5 +1,4 @@
 # To-do list intelligent
-# Lien public : https://toyboy6.github.io/Test-notification/
 # 📸 Instagram - Task Manager & Notifications Studio
 
 Une application web mobile optimisée (PWA) conçue pour simuler des notifications Push au style Instagram et gérer une To-Do List intelligente validée par l'IA Gemini.
@@ -47,3 +46,5 @@ Une application web mobile optimisée (PWA) conçue pour simuler des notificatio
 ├── index.html     # Application principale (UI & Logique)
 ├── sw.js          # Service Worker pour la gestion des notifications
 └── README.md      # Documentation du projet
+
+# Lien public : https://toyboy6.github.io/Test-notification/
